@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <script src="./jquery.min.js"></script>
+        <script type="text/javascript">
+            window.onload=function(){
+                setInterval(getRecentChats,1000);
+            }
+
+            var lastTimeline;
+            var lastUid;
+
+            function getRecentChats(){
+                //https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=21759271"
+
+                $.ajax({
+                    url:"https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=21759271",
+                    success:(res)=>{
+
+                        addDanmu(res.data.room[res.data.room.length-1]);
+                    }
+                });
+            }
+
+            function addDanmu(item){
+                //判断当前弹幕是否已经朗读过了
+                if(lastTimeline==item.timeline)return;
+
+                lastTimeline = item.timeline;
+
+                //将文本念出来
+                var utterThis = new window.SpeechSynthesisUtterance(item.text);
+                window.speechSynthesis.speak(utterThis);
+
+                //创建弹幕div
+                var danmu = $("<div class='danmu_item'>"+item.text+"</div>");
+                $(document.body).append(danmu);
+                
+                //设定弹幕的动画时长
+                $(danmu).css("transition","all 5s linear");
+
+                //延时设定弹幕的结束x位置，动画会自动开始
+                setTimeout(()=>{
+                    $(danmu).css("left","-100%");
+                },100);
+            }
+        </script>
+        <style>
+            html,body{
+                background-color: transparent;
+            }
+
+            .danmu_item{
+                font-size: 40px;
+                color:#fff;
+                top: 0px;
+                left: 100vw;
+                position: absolute;
+                white-space: nowrap;
+            }
+        </style>
+    </head>
+    <body>
+    </body>
+</html>
